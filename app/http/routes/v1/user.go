@@ -9,9 +9,9 @@ import (
 func (i *V1Routes) MountUser() {
 	gUser := i.Echo.Group("/user")
 
-	userITHandler := handlers.NewUserITHandler(services.NewUserITService(
-		repositories.NewUserITRepository(),
-	))
+	r := repositories.NewUserITRepository()
+	s := services.NewUserITService(r)
+	userITHandler := handlers.NewUserITHandler(s)
 
 	gUserIT := gUser.Group("/it")
 

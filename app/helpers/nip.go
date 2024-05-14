@@ -2,15 +2,11 @@ package helpers
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
-)
 
-const (
-	CODE_ROLE_IT       int = 615
-	CODE_ROLE_NURSE    int = 303
-	CODE_GENDER_MALE   int = 1
-	CODE_GENDER_FEMALE int = 2
+	"github.com/alfanzain/project-sprint-halo-suster/app/consts"
 )
 
 type DecodedNIP struct {
@@ -24,6 +20,7 @@ type DecodedNIP struct {
 
 func DecodeNIP(nip string) (nipNumber *DecodedNIP, err error) {
 	if len(nip) != 13 {
+		fmt.Println("nip length is invalid")
 		return nil, errors.New("nip is invalid")
 	}
 
@@ -47,37 +44,43 @@ func DecodeNIP(nip string) (nipNumber *DecodedNIP, err error) {
 	}
 
 	roleCodes := Slice[int]{
-		CODE_ROLE_IT,
-		CODE_ROLE_NURSE,
+		consts.NIP_CODE_ROLE_IT,
+		consts.NIP_CODE_ROLE_NURSE,
 	}
-	if roleCodes.Includes(nipNumber.RoleID) {
+	if !roleCodes.Includes(nipNumber.RoleID) {
+		fmt.Println("nip role code is invalid")
 		return nil, errors.New("nip is invalid")
 	}
 
 	genderCodes := Slice[int]{
-		CODE_GENDER_MALE,
-		CODE_GENDER_FEMALE,
+		consts.NIP_CODE_GENDER_MALE,
+		consts.NIP_CODE_GENDER_FEMALE,
 	}
-	if genderCodes.Includes(nipNumber.GenderID) {
+	if !genderCodes.Includes(nipNumber.GenderID) {
+		fmt.Println("nip gender code is invalid")
 		return nil, errors.New("nip is invalid")
 	}
 
 	year, err := strconv.Atoi(nipNumber.Year)
 	if err != nil {
+		fmt.Println("nip year is invalid")
 		return nil, errors.New("nip is invalid")
 	}
 
 	currentYear := time.Now().Year()
 	if year < 2000 || year > currentYear {
+		fmt.Println("nip year is invalid")
 		return nil, errors.New("nip is invalid")
 	}
 
 	month, err := strconv.Atoi(nipNumber.Month)
 	if err != nil {
+		fmt.Println("nip month is invalid")
 		return nil, errors.New("nip is invalid")
 	}
 
 	if month < 1 || month > 12 {
+		fmt.Println("nip month is invalid")
 		return nil, errors.New("nip is invalid")
 	}
 

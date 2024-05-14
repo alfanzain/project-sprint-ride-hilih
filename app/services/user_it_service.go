@@ -1,12 +1,14 @@
 package services
 
 import (
-	"errors"
+	"log"
 	"os"
 
+	"github.com/alfanzain/project-sprint-halo-suster/app/consts"
 	repositoryContracts "github.com/alfanzain/project-sprint-halo-suster/app/contracts/repositories"
 	serviceContracts "github.com/alfanzain/project-sprint-halo-suster/app/contracts/services"
 	"github.com/alfanzain/project-sprint-halo-suster/app/entities"
+	"github.com/alfanzain/project-sprint-halo-suster/app/errs"
 	"github.com/alfanzain/project-sprint-halo-suster/app/helpers"
 )
 
@@ -22,21 +24,27 @@ func NewUserITService(
 	}
 }
 
-var ErrNIPAlreadyRegistered = errors.New("nip already registered")
-var ErrUserITNotFound = errors.New("user IT not found")
-var ErrInvalidPassword = errors.New("invalid password")
-
 func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.User, error) {
 	nipExists, _ := s.userITRepository.DoesNIPExist(p.NIP)
 
 	if nipExists {
-		return nil, ErrNIPAlreadyRegistered
+		return nil, errs.ErrNIPAlreadyRegistered
 	}
 
-	hashedPassword, _ := helpers.HashPassword(p.Password)
-	decodedNIP, _ := helpers.DecodeNIP(p.Password)
+	hashedPassword, err := helpers.HashPassword(p.Password)
+	if err != nil {
+		return nil, err
+	}
 
-	// if decodedNIP.RoleID ==
+	decodedNIP, err := helpers.DecodeNIP(p.NIP)
+	if err != nil {
+		return nil, err
+	}
+
+	if decodedNIP.RoleID != consts.NIP_CODE_ROLE_IT {
+		log.Fatalln(errs.ErrInvalidNIP)
+		return nil, errs.ErrInvalidNIP
+	}
 
 	userIT, err := s.userITRepository.Store(&entities.UserITStorePayload{
 		NIP:      p.NIP,
@@ -45,6 +53,10 @@ func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.U
 		GenderID: decodedNIP.GenderID,
 		Password: hashedPassword,
 	})
+
+	if err != nil {
+		return nil, err
+	}
 
 	paramsGenerateJWTRegister := helpers.ParamsGenerateJWT{
 		ExpiredInMinute: 480,
@@ -56,10 +68,6 @@ func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.U
 
 	if errAccessToken != nil {
 		return nil, errAccessToken
-	}
-
-	if err != nil {
-		return nil, err
 	}
 
 	return &entities.User{
@@ -76,12 +84,12 @@ func (s *UserITService) Login(p *entities.UserITLoginPayload) (*entities.User, e
 		return nil, err
 	}
 	if userIT == nil {
-		return nil, ErrUserITNotFound
+		return nil, errs.ErrUserITNotFound
 	}
 
 	isValidPassword := helpers.CheckPasswordHash(p.Password, userIT.Password)
 	if !isValidPassword {
-		return nil, ErrInvalidPassword
+		return nil, errs.ErrInvalidPassword
 	}
 
 	paramsGenerateJWTLogin := helpers.ParamsGenerateJWT{
