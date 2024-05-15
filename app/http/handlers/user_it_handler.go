@@ -118,10 +118,3 @@ func (h *UserITHandler) Login(c echo.Context) (e error) {
 		Data:    data,
 	})
 }
-
-func (h *UserITHandler) GetUsers(c echo.Context) (e error) {
-	return c.JSON(http.StatusOK, SuccessResponse{
-		Message: "success",
-		Data:    nil,
-	})
-}
