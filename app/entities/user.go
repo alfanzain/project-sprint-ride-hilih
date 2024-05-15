@@ -6,8 +6,8 @@ type (
 		Name        string `json:"name"`
 		NIP         string `json:"nip"`
 		Password    string `json:"-"`
-		RoleID      int    `json:"-"`
-		GenderID    int    `json:"-"`
+		RoleID      string `json:"-"`
+		GenderID    string `json:"-"`
 		AccessToken string `json:"accessToken"`
 	}
 
@@ -18,7 +18,7 @@ type (
 	}
 
 	UserITLoginRequest struct {
-		NIP      int    `json:"nip" validate:"required,min=13,max=13"`
+		NIP      int    `json:"nip" validate:"required"`
 		Password string `json:"password" validate:"required,min=5,max=15"`
 	}
 
@@ -37,8 +37,8 @@ type (
 		ID       string
 		Name     string
 		NIP      string
-		RoleID   int
-		GenderID int
+		RoleID   string
+		GenderID string
 		Password string
 	}
 )

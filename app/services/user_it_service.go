@@ -3,6 +3,7 @@ package services
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/alfanzain/project-sprint-halo-suster/app/consts"
 	repositoryContracts "github.com/alfanzain/project-sprint-halo-suster/app/contracts/repositories"
@@ -49,8 +50,8 @@ func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.U
 	userIT, err := s.userITRepository.Store(&entities.UserITStorePayload{
 		NIP:      p.NIP,
 		Name:     p.Name,
-		RoleID:   decodedNIP.RoleID,
-		GenderID: decodedNIP.GenderID,
+		RoleID:   strconv.Itoa(decodedNIP.RoleID),
+		GenderID: strconv.Itoa(decodedNIP.GenderID),
 		Password: hashedPassword,
 	})
 
@@ -59,9 +60,9 @@ func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.U
 	}
 
 	paramsGenerateJWTRegister := helpers.ParamsGenerateJWT{
-		ExpiredInMinute: 480,
-		SecretKey:       os.Getenv("JWT_SECRET"),
-		UserId:          userIT.ID,
+		SecretKey: os.Getenv("JWT_SECRET"),
+		UserID:    userIT.ID,
+		RoleID:    userIT.RoleID,
 	}
 
 	accessToken, errAccessToken := helpers.GenerateJWT(&paramsGenerateJWTRegister)
@@ -93,9 +94,9 @@ func (s *UserITService) Login(p *entities.UserITLoginPayload) (*entities.User, e
 	}
 
 	paramsGenerateJWTLogin := helpers.ParamsGenerateJWT{
-		ExpiredInMinute: 480,
-		SecretKey:       os.Getenv("JWT_SECRET"),
-		UserId:          userIT.ID,
+		SecretKey: os.Getenv("JWT_SECRET"),
+		UserID:    userIT.ID,
+		RoleID:    userIT.RoleID,
 	}
 
 	accessToken, err := helpers.GenerateJWT(&paramsGenerateJWTLogin)

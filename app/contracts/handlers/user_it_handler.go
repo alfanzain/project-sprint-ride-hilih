@@ -7,4 +7,5 @@ import (
 type IUserITHandler interface {
 	Register(echo.Context) error
 	Login(echo.Context) error
+	GetUsers(echo.Context) error
 }

@@ -16,8 +16,9 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-type roleValidator struct {
-	Role string `mapstructure:"role" validate:"required"`
+type UserValidator struct {
+	UserID string `mapstructure:"user_id" validate:"required"`
+	RoleID string `mapstructure:"role_id" validate:"required"`
 }
 
 func Authorized() echo.MiddlewareFunc {
@@ -44,10 +45,8 @@ func Authorized() echo.MiddlewareFunc {
 				})
 			}
 
-			user := make(map[string]interface{})
-			userRole := new(roleValidator)
+			user := new(UserValidator)
 			mapstructure.Decode(claims, &user)
-			mapstructure.Decode(claims, &userRole)
 
 			c.Set("user", user)
 

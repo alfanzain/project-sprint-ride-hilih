@@ -11,9 +11,9 @@ var JWT_SIGNING_METHOD = jwt.SigningMethodHS256
 
 type (
 	ParamsGenerateJWT struct {
-		ExpiredInMinute int
-		SecretKey       string
-		UserId          string
+		SecretKey string
+		UserID    string
+		RoleID    string
 	}
 	ParamsValidateJWT struct {
 		Token     string
@@ -21,17 +21,21 @@ type (
 	}
 	Claims struct {
 		jwt.StandardClaims
-		UserId string `json:"user_id,omitempty"`
+		UserID string `json:"user_id,omitempty"`
+		RoleID string `json:"role_id,omitempty"`
 	}
 )
 
+const JWT_EXPIRED_IN_MINUTES = 480
+
 func GenerateJWT(p *ParamsGenerateJWT) (string, error) {
-	expiredAt := time.Now().Add(time.Duration(p.ExpiredInMinute) * time.Minute).Unix()
+	expiredAt := time.Now().Add(time.Duration(JWT_EXPIRED_IN_MINUTES) * time.Minute).Unix()
 	claims := Claims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiredAt,
 		},
-		UserId: p.UserId,
+		UserID: p.UserID,
+		RoleID: p.RoleID,
 	}
 
 	token := jwt.NewWithClaims(
