@@ -19,7 +19,7 @@ func IsRoleIT() echo.MiddlewareFunc {
 			fmt.Println(userCtx.UserID)
 			fmt.Println(userCtx.RoleID)
 
-			if userCtx.RoleID != strconv.Itoa(consts.NIP_CODE_ROLE_NURSE) {
+			if userCtx.RoleID != strconv.Itoa(consts.NIP_CODE_ROLE_IT) {
 				return c.JSON(http.StatusUnauthorized, ErrorResponse{
 					Status:  false,
 					Message: "Unauthorized",
