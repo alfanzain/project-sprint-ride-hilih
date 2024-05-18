@@ -22,6 +22,18 @@ func NewUserRepository() repositoryContracts.IUserRepository {
 	return &UserRepository{DB: databases.PostgreSQLInstance}
 }
 
+func (r *UserRepository) FindByID(userID string) (*entities.User, error) {
+	var user entities.User
+	err := r.DB.QueryRow(`SELECT id, nip, name, password, role_id, gender_id FROM users WHERE id = $1`, userID).Scan(&user.ID, &user.NIP, &user.Name, &user.Password, &user.RoleID, &user.GenderID)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Fatalln(err)
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (r *UserRepository) FindByNIP(NIP string) (*entities.User, error) {
 	var user entities.User
 	err := r.DB.QueryRow(`SELECT id, nip, name, password, role_id, gender_id FROM users WHERE nip = $1`, NIP).Scan(&user.ID, &user.NIP, &user.Name, &user.Password, &user.RoleID, &user.GenderID)
@@ -158,4 +170,22 @@ func (r *UserRepository) GetUsers(filters *entities.UserGetFilterParams) ([]*ent
 	}
 
 	return users, nil
+}
+
+func (r *UserRepository) Update(p *entities.UserUpdatePayload) (*entities.UserUpdateResponse, error) {
+	_, err := r.DB.Exec("UPDATE users SET name = $2 WHERE id = $1",
+		p.ID,
+		p.Name,
+	)
+	if err != nil {
+		log.Printf("Error updating product: %s", err)
+		return nil, err
+	}
+
+	user := &entities.UserUpdateResponse{
+		ID:   p.ID,
+		Name: p.Name,
+	}
+
+	return user, nil
 }

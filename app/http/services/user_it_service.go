@@ -23,7 +23,7 @@ func NewUserITService(
 	}
 }
 
-func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.User, error) {
+func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.UserLoginResponse, error) {
 	nipExists, _ := s.userITRepository.DoesNIPExist(p.NIP)
 
 	if nipExists {
@@ -69,7 +69,7 @@ func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.U
 		return nil, errAccessToken
 	}
 
-	return &entities.User{
+	return &entities.UserLoginResponse{
 		ID:          userIT.ID,
 		NIP:         userIT.NIP,
 		Name:        p.Name,
@@ -77,7 +77,7 @@ func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.U
 	}, nil
 }
 
-func (s *UserITService) Login(p *entities.UserITLoginPayload) (*entities.User, error) {
+func (s *UserITService) Login(p *entities.UserITLoginPayload) (*entities.UserLoginResponse, error) {
 	userIT, err := s.userITRepository.FindByNIP(p.NIP)
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (s *UserITService) Login(p *entities.UserITLoginPayload) (*entities.User, e
 		return nil, err
 	}
 
-	return &entities.User{
+	return &entities.UserLoginResponse{
 		ID:          userIT.ID,
 		NIP:         userIT.NIP,
 		Name:        userIT.Name,

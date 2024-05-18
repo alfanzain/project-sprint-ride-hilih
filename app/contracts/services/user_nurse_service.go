@@ -3,6 +3,7 @@ package services
 import "github.com/alfanzain/project-sprint-halo-suster/app/entities"
 
 type IUserNurseService interface {
-	Register(*entities.UserNurseRegisterPayload) (*entities.User, error)
-	Login(*entities.UserITLoginPayload) (*entities.User, error)
+	Register(*entities.UserNurseRegisterPayload) (*entities.UserLoginResponse, error)
+	Login(*entities.UserITLoginPayload) (*entities.UserLoginResponse, error)
+	Update(*entities.UserUpdatePayload) (*entities.UserUpdateResponse, error)
 }

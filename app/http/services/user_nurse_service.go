@@ -23,7 +23,7 @@ func NewUserNurseService(
 	}
 }
 
-func (s *UserNurseService) Register(p *entities.UserNurseRegisterPayload) (*entities.User, error) {
+func (s *UserNurseService) Register(p *entities.UserNurseRegisterPayload) (*entities.UserLoginResponse, error) {
 	nipExists, _ := s.userRepository.DoesNIPExist(p.NIP)
 
 	if nipExists {
@@ -62,7 +62,7 @@ func (s *UserNurseService) Register(p *entities.UserNurseRegisterPayload) (*enti
 		return nil, errAccessToken
 	}
 
-	return &entities.User{
+	return &entities.UserLoginResponse{
 		ID:          userIT.ID,
 		NIP:         userIT.NIP,
 		Name:        p.Name,
@@ -70,7 +70,7 @@ func (s *UserNurseService) Register(p *entities.UserNurseRegisterPayload) (*enti
 	}, nil
 }
 
-func (s *UserNurseService) Login(p *entities.UserITLoginPayload) (*entities.User, error) {
+func (s *UserNurseService) Login(p *entities.UserITLoginPayload) (*entities.UserLoginResponse, error) {
 	userIT, err := s.userRepository.FindByNIP(p.NIP)
 	if err != nil {
 		return nil, err
@@ -95,10 +95,34 @@ func (s *UserNurseService) Login(p *entities.UserITLoginPayload) (*entities.User
 		return nil, err
 	}
 
-	return &entities.User{
+	return &entities.UserLoginResponse{
 		ID:          userIT.ID,
 		NIP:         userIT.NIP,
 		Name:        userIT.Name,
 		AccessToken: accessToken,
+	}, nil
+}
+
+func (s *UserNurseService) Update(p *entities.UserUpdatePayload) (*entities.UserUpdateResponse, error) {
+	user, err := s.userRepository.FindByID(p.ID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errs.ErrUserNotFound
+	}
+	if strconv.Itoa(user.NIP) == p.NIP {
+		return nil, errs.ErrInvalidNIP
+	}
+
+	updatedUser, err := s.userRepository.Update(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entities.UserUpdateResponse{
+		ID:   updatedUser.ID,
+		NIP:  user.NIP,
+		Name: updatedUser.Name,
 	}, nil
 }

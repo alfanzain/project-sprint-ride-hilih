@@ -121,7 +121,55 @@ func (h *UserNurseHandler) Login(c echo.Context) (e error) {
 }
 
 func (h *UserNurseHandler) Update(c echo.Context) (e error) {
-	return c.JSON(http.StatusBadRequest, nil)
+	r := new(entities.UserUpdateRequest)
+
+	if e = c.Bind(r); e != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
+
+	if e = c.Validate(r); e != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
+
+	id := c.Param("userID")
+
+	data, err := h.userNurseService.Update(&entities.UserUpdatePayload{
+		ID:   id,
+		NIP:  strconv.Itoa(r.NIP),
+		Name: r.Name,
+	})
+
+	if err != nil && errors.Is(err, errs.ErrInvalidNIP) {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: err.Error(),
+		})
+	}
+
+	if err != nil && errors.Is(err, errs.ErrNIPAlreadyRegistered) {
+		return c.JSON(http.StatusConflict, ErrorResponse{
+			Status:  false,
+			Message: err.Error(),
+		})
+	}
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Status:  false,
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse{
+		Message: "User updated successfully",
+		Data:    data,
+	})
 }
 
 func (h *UserNurseHandler) Destroy(c echo.Context) (e error) {

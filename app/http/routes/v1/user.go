@@ -27,7 +27,7 @@ func (i *V1Routes) MountUser() {
 	gUserNurse := gUser.Group("/nurse")
 	gUserNurse.POST("/register", userNurseHandler.Register, middlewares.Authorized(), middlewares.IsRoleIT())
 	gUserNurse.POST("/login", userNurseHandler.Login)
-	gUserNurse.PUT("/:userID", userNurseHandler.Update)
+	gUserNurse.PUT("/:userID", userNurseHandler.Update, middlewares.Authorized(), middlewares.IsRoleIT())
 	gUserNurse.DELETE("/:userID", userNurseHandler.Destroy)
 	gUserNurse.POST("/:userID/access", userNurseHandler.GrantAccess)
 }

@@ -4,14 +4,13 @@ import "time"
 
 type (
 	User struct {
-		ID          string    `json:"userId"`
-		Name        string    `json:"name"`
-		NIP         int       `json:"nip"`
-		Password    string    `json:"-"`
-		RoleID      string    `json:"-"`
-		GenderID    string    `json:"-"`
-		AccessToken string    `json:"accessToken"`
-		CreatedAt   time.Time `json:"createdAt"`
+		ID        string    `json:"userId"`
+		Name      string    `json:"name"`
+		NIP       int       `json:"nip"`
+		Password  string    `json:"-"`
+		RoleID    string    `json:"-"`
+		GenderID  string    `json:"-"`
+		CreatedAt time.Time `json:"createdAt"`
 	}
 
 	UserGetRequest struct {
@@ -31,6 +30,11 @@ type (
 		CreatedAt string
 	}
 
+	UserUpdateRequest struct {
+		NIP  int    `json:"nip" validate:"required"`
+		Name string `json:"name" validate:"required,min=5,max=50"`
+	}
+
 	UserITRegisterRequest struct {
 		NIP      int    `json:"nip" validate:"required"`
 		Name     string `json:"name" validate:"required,min=5,max=50"`
@@ -46,11 +50,6 @@ type (
 		NIP                 int    `json:"nip" validate:"required"`
 		Name                string `json:"name" validate:"required,min=5,max=50"`
 		IdentityCardScanImg string `json:"identityCardScanImg" validate:"required"` // should be url
-	}
-
-	UserNurseUpdateRequest struct {
-		NIP  int    `json:"nip" validate:"required"`
-		Name string `json:"name" validate:"required,min=5,max=50"`
 	}
 
 	UserNurseGrantAccessRequest struct {
@@ -81,5 +80,24 @@ type (
 		NIP                 string
 		Name                string
 		IdentityCardScanImg string
+	}
+
+	UserUpdatePayload struct {
+		ID   string
+		NIP  string
+		Name string
+	}
+
+	UserLoginResponse struct {
+		ID          string `json:"userId"`
+		Name        string `json:"name"`
+		NIP         int    `json:"nip"`
+		AccessToken string `json:"accessToken"`
+	}
+
+	UserUpdateResponse struct {
+		ID   string `json:"userId"`
+		Name string `json:"name"`
+		NIP  int    `json:"nip"`
 	}
 )
