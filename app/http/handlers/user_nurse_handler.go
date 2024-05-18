@@ -173,22 +173,6 @@ func (h *UserNurseHandler) Update(c echo.Context) (e error) {
 }
 
 func (h *UserNurseHandler) Destroy(c echo.Context) (e error) {
-	r := new(entities.UserUpdateRequest)
-
-	if e = c.Bind(r); e != nil {
-		return c.JSON(http.StatusBadRequest, ErrorResponse{
-			Status:  false,
-			Message: e.Error(),
-		})
-	}
-
-	if e = c.Validate(r); e != nil {
-		return c.JSON(http.StatusBadRequest, ErrorResponse{
-			Status:  false,
-			Message: e.Error(),
-		})
-	}
-
 	id := c.Param("userID")
 
 	data, err := h.userNurseService.Delete(id)

@@ -94,7 +94,6 @@ func IsNIPNurseValid(NIProleID int) (bool, error) {
 		return true, nil
 	}
 
-	log.Fatalln(errs.ErrInvalidNIP)
 	return false, errs.ErrInvalidNIP
 }
 

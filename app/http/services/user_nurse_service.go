@@ -2,7 +2,6 @@ package services
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 	"strconv"
 
@@ -135,7 +134,16 @@ func (s *UserNurseService) Delete(userID string) (bool, error) {
 
 		return false, err
 	}
-	fmt.Println(user)
+
+	roleID, err := strconv.Atoi(user.RoleID)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = helpers.IsNIPNurseValid(roleID)
+	if err != nil {
+		return false, errs.ErrNotNurse
+	}
 
 	_, err = s.userRepository.Destroy(userID)
 	if err != nil {
