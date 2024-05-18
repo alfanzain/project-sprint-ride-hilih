@@ -86,7 +86,7 @@ func (s *UserITService) Login(p *entities.UserITLoginPayload) (*entities.UserLog
 		return nil, errs.ErrUserITNotFound
 	}
 
-	isValidPassword := helpers.CheckPasswordHash(p.Password, userIT.Password)
+	isValidPassword := helpers.CheckPasswordHash(p.Password, *userIT.Password)
 	if !isValidPassword {
 		return nil, errs.ErrInvalidPassword
 	}

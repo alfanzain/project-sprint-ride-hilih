@@ -1,6 +1,8 @@
 package services
 
 import (
+	"database/sql"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -79,7 +81,7 @@ func (s *UserNurseService) Login(p *entities.UserITLoginPayload) (*entities.User
 		return nil, errs.ErrUserITNotFound
 	}
 
-	isValidPassword := helpers.CheckPasswordHash(p.Password, userIT.Password)
+	isValidPassword := helpers.CheckPasswordHash(p.Password, *userIT.Password)
 	if !isValidPassword {
 		return nil, errs.ErrInvalidPassword
 	}
@@ -111,9 +113,6 @@ func (s *UserNurseService) Update(p *entities.UserUpdatePayload) (*entities.User
 	if user == nil {
 		return nil, errs.ErrUserNotFound
 	}
-	if strconv.Itoa(user.NIP) == p.NIP {
-		return nil, errs.ErrInvalidNIP
-	}
 
 	updatedUser, err := s.userRepository.Update(p)
 	if err != nil {
@@ -125,4 +124,23 @@ func (s *UserNurseService) Update(p *entities.UserUpdatePayload) (*entities.User
 		NIP:  user.NIP,
 		Name: updatedUser.Name,
 	}, nil
+}
+
+func (s *UserNurseService) Delete(userID string) (bool, error) {
+	user, err := s.userRepository.FindByID(userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, errs.ErrUserNotFound
+		}
+
+		return false, err
+	}
+	fmt.Println(user)
+
+	_, err = s.userRepository.Destroy(userID)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

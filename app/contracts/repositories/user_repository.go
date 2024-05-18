@@ -9,4 +9,5 @@ type IUserRepository interface {
 	Store(*entities.UserStorePayload) (*entities.User, error)
 	GetUsers(*entities.UserGetFilterParams) ([]*entities.User, error)
 	Update(*entities.UserUpdatePayload) (*entities.UserUpdateResponse, error)
+	Destroy(string) (bool, error)
 }

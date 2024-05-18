@@ -7,7 +7,7 @@ type (
 		ID        string    `json:"userId"`
 		Name      string    `json:"name"`
 		NIP       int       `json:"nip"`
-		Password  string    `json:"-"`
+		Password  *string   `json:"-"`
 		RoleID    string    `json:"-"`
 		GenderID  string    `json:"-"`
 		CreatedAt time.Time `json:"createdAt"`

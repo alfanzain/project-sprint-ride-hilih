@@ -173,7 +173,43 @@ func (h *UserNurseHandler) Update(c echo.Context) (e error) {
 }
 
 func (h *UserNurseHandler) Destroy(c echo.Context) (e error) {
-	return c.JSON(http.StatusBadRequest, nil)
+	r := new(entities.UserUpdateRequest)
+
+	if e = c.Bind(r); e != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
+
+	if e = c.Validate(r); e != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
+
+	id := c.Param("userID")
+
+	data, err := h.userNurseService.Delete(id)
+	if err != nil {
+		if errors.Is(err, errs.ErrUserNotFound) {
+			return c.JSON(http.StatusNotFound, ErrorResponse{
+				Status:  false,
+				Message: err.Error(),
+			})
+		}
+
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Status:  false,
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse{
+		Message: "User deleted successfully",
+		Data:    data,
+	})
 }
 
 func (h *UserNurseHandler) GrantAccess(c echo.Context) (e error) {

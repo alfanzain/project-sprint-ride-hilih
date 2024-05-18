@@ -25,13 +25,12 @@ func NewUserRepository() repositoryContracts.IUserRepository {
 func (r *UserRepository) FindByID(userID string) (*entities.User, error) {
 	var user entities.User
 	err := r.DB.QueryRow(`SELECT id, nip, name, password, role_id, gender_id FROM users WHERE id = $1`, userID).Scan(&user.ID, &user.NIP, &user.Name, &user.Password, &user.RoleID, &user.GenderID)
-
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Fatalln(err)
 		return nil, err
 	}
 
-	return &user, nil
+	return &user, err
 }
 
 func (r *UserRepository) FindByNIP(NIP string) (*entities.User, error) {
@@ -173,19 +172,37 @@ func (r *UserRepository) GetUsers(filters *entities.UserGetFilterParams) ([]*ent
 }
 
 func (r *UserRepository) Update(p *entities.UserUpdatePayload) (*entities.UserUpdateResponse, error) {
-	_, err := r.DB.Exec("UPDATE users SET name = $2 WHERE id = $1",
+	_, err := r.DB.Exec("UPDATE users SET name = $2, nip = $3 WHERE id = $1",
 		p.ID,
 		p.Name,
+		p.NIP,
 	)
 	if err != nil {
-		log.Printf("Error updating product: %s", err)
+		log.Printf("Error updating user: %s", err)
+		return nil, err
+	}
+
+	NIP, err := strconv.Atoi(p.NIP)
+	if err != nil {
 		return nil, err
 	}
 
 	user := &entities.UserUpdateResponse{
 		ID:   p.ID,
 		Name: p.Name,
+		NIP:  NIP,
 	}
 
 	return user, nil
+}
+
+func (r *UserRepository) Destroy(userID string) (bool, error) {
+	_, err := r.DB.Exec("DELETE FROM users WHERE id = $1;", userID)
+
+	if err != nil {
+		log.Printf("Error deleting user: %s", err)
+		return false, err
+	}
+
+	return true, nil
 }
