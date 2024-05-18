@@ -172,19 +172,40 @@ func (r *UserRepository) GetUsers(filters *entities.UserGetFilterParams) ([]*ent
 }
 
 func (r *UserRepository) Update(p *entities.UserUpdatePayload) (*entities.UserUpdateResponse, error) {
-	_, err := r.DB.Exec("UPDATE users SET name = $2, nip = $3 WHERE id = $1",
-		p.ID,
-		p.Name,
-		p.NIP,
-	)
+	var NIP int
+	err := r.DB.QueryRow(`SELECT nip FROM users WHERE id = $1`, p.ID).Scan(&NIP)
 	if err != nil {
-		log.Printf("Error updating user: %s", err)
+		log.Fatalln(err)
 		return nil, err
 	}
 
-	NIP, err := strconv.Atoi(p.NIP)
+	NIPPayload, err := strconv.Atoi(p.NIP)
 	if err != nil {
+		log.Fatalln(err)
 		return nil, err
+	}
+
+	if NIP == NIPPayload {
+		_, err := r.DB.Exec("UPDATE users SET name = $2 WHERE id = $1",
+			p.ID,
+			p.Name,
+		)
+
+		if err != nil {
+			log.Printf("Error updating user: %s", err)
+			return nil, err
+		}
+	} else {
+		_, err := r.DB.Exec("UPDATE users SET name = $2, nip = $3 WHERE id = $1",
+			p.ID,
+			p.Name,
+			p.NIP,
+		)
+
+		if err != nil {
+			log.Printf("Error updating user: %s", err)
+			return nil, err
+		}
 	}
 
 	user := &entities.UserUpdateResponse{
@@ -194,6 +215,23 @@ func (r *UserRepository) Update(p *entities.UserUpdatePayload) (*entities.UserUp
 	}
 
 	return user, nil
+}
+
+func (r *UserRepository) UpdatePassword(p *entities.UserNurseGrantAccessPayload) (*entities.UserUpdatePasswordResponse, error) {
+	_, err := r.DB.Exec("UPDATE users SET password = $2 WHERE id = $1",
+		p.ID,
+		p.Password,
+	)
+	if err != nil {
+		log.Printf("Error updating user: %s", err)
+		return nil, err
+	}
+
+	user := &entities.UserUpdatePasswordResponse{
+		ID: p.ID,
+	}
+
+	return user, err
 }
 
 func (r *UserRepository) Destroy(userID string) (bool, error) {

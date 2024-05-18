@@ -81,11 +81,15 @@ type (
 		Name                string
 		IdentityCardScanImg string
 	}
-
 	UserUpdatePayload struct {
 		ID   string
 		NIP  string
 		Name string
+	}
+
+	UserNurseGrantAccessPayload struct {
+		ID       string
+		Password string
 	}
 
 	UserLoginResponse struct {
@@ -99,5 +103,9 @@ type (
 		ID   string `json:"userId"`
 		Name string `json:"name"`
 		NIP  int    `json:"nip"`
+	}
+
+	UserUpdatePasswordResponse struct {
+		ID string `json:"userId"`
 	}
 )

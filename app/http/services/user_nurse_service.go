@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"errors"
 	"os"
 	"strconv"
 
@@ -107,10 +108,31 @@ func (s *UserNurseService) Login(p *entities.UserITLoginPayload) (*entities.User
 func (s *UserNurseService) Update(p *entities.UserUpdatePayload) (*entities.UserUpdateResponse, error) {
 	user, err := s.userRepository.FindByID(p.ID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errs.ErrUserNotFound
+		}
+
 		return nil, err
 	}
-	if user == nil {
-		return nil, errs.ErrUserNotFound
+
+	roleID, err := strconv.Atoi(user.RoleID)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = helpers.IsNIPNurseValid(roleID)
+	if err != nil {
+		return nil, errs.ErrNotNurse
+	}
+
+	decodedNIP, err := helpers.DecodeNIP(p.NIP)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = helpers.IsNIPNurseValid(decodedNIP.RoleID)
+	if err != nil {
+		return nil, err
 	}
 
 	updatedUser, err := s.userRepository.Update(p)
@@ -125,10 +147,47 @@ func (s *UserNurseService) Update(p *entities.UserUpdatePayload) (*entities.User
 	}, nil
 }
 
+func (s *UserNurseService) UpdatePassword(p *entities.UserNurseGrantAccessPayload) (*entities.UserUpdatePasswordResponse, error) {
+	user, err := s.userRepository.FindByID(p.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errs.ErrUserNotFound
+		}
+
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(user.RoleID)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = helpers.IsNIPNurseValid(roleID)
+	if err != nil {
+		return nil, errs.ErrNotNurse
+	}
+
+	hashedPassword, err := helpers.HashPassword(p.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Password = hashedPassword
+
+	updatedUser, err := s.userRepository.UpdatePassword(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entities.UserUpdatePasswordResponse{
+		ID: updatedUser.ID,
+	}, nil
+}
+
 func (s *UserNurseService) Delete(userID string) (bool, error) {
 	user, err := s.userRepository.FindByID(userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return false, errs.ErrUserNotFound
 		}
 

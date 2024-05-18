@@ -145,21 +145,35 @@ func (h *UserNurseHandler) Update(c echo.Context) (e error) {
 		Name: r.Name,
 	})
 
-	if err != nil && errors.Is(err, errs.ErrInvalidNIP) {
-		return c.JSON(http.StatusBadRequest, ErrorResponse{
-			Status:  false,
-			Message: err.Error(),
-		})
-	}
-
-	if err != nil && errors.Is(err, errs.ErrNIPAlreadyRegistered) {
-		return c.JSON(http.StatusConflict, ErrorResponse{
-			Status:  false,
-			Message: err.Error(),
-		})
-	}
-
 	if err != nil {
+		if errors.Is(err, errs.ErrUserNotFound) {
+			return c.JSON(http.StatusNotFound, ErrorResponse{
+				Status:  false,
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, errs.ErrInvalidNIP) {
+			return c.JSON(http.StatusBadRequest, ErrorResponse{
+				Status:  false,
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, errs.ErrNotNurse) {
+			return c.JSON(http.StatusBadRequest, ErrorResponse{
+				Status:  false,
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, errs.ErrNIPAlreadyRegistered) {
+			return c.JSON(http.StatusConflict, ErrorResponse{
+				Status:  false,
+				Message: err.Error(),
+			})
+		}
+
 		return c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Status:  false,
 			Message: err.Error(),
@@ -197,5 +211,44 @@ func (h *UserNurseHandler) Destroy(c echo.Context) (e error) {
 }
 
 func (h *UserNurseHandler) GrantAccess(c echo.Context) (e error) {
-	return c.JSON(http.StatusBadRequest, nil)
+	r := new(entities.UserNurseGrantAccessRequest)
+
+	if e = c.Bind(r); e != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
+
+	if e = c.Validate(r); e != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
+
+	id := c.Param("userID")
+
+	data, err := h.userNurseService.UpdatePassword(&entities.UserNurseGrantAccessPayload{
+		ID:       id,
+		Password: r.Password,
+	})
+	if err != nil {
+		if errors.Is(err, errs.ErrUserNotFound) {
+			return c.JSON(http.StatusNotFound, ErrorResponse{
+				Status:  false,
+				Message: err.Error(),
+			})
+		}
+
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Status:  false,
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse{
+		Message: "User access granted successfully",
+		Data:    data,
+	})
 }
