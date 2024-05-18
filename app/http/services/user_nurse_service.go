@@ -1,40 +1,33 @@
 package services
 
 import (
-	"log"
 	"os"
 	"strconv"
 
-	"github.com/alfanzain/project-sprint-halo-suster/app/consts"
 	repositoryContracts "github.com/alfanzain/project-sprint-halo-suster/app/contracts/repositories"
 	serviceContracts "github.com/alfanzain/project-sprint-halo-suster/app/contracts/services"
 	"github.com/alfanzain/project-sprint-halo-suster/app/entities"
-	"github.com/alfanzain/project-sprint-halo-suster/app/errs"
-	"github.com/alfanzain/project-sprint-halo-suster/app/helpers"
+	"github.com/alfanzain/project-sprint-halo-suster/app/http/errs"
+	"github.com/alfanzain/project-sprint-halo-suster/app/http/helpers"
 )
 
-type UserITService struct {
-	userITRepository repositoryContracts.IUserITRepository
+type UserNurseService struct {
+	userRepository repositoryContracts.IUserRepository
 }
 
-func NewUserITService(
-	userITRepository repositoryContracts.IUserITRepository,
-) serviceContracts.IUserITService {
-	return &UserITService{
-		userITRepository: userITRepository,
+func NewUserNurseService(
+	userRepository repositoryContracts.IUserRepository,
+) serviceContracts.IUserNurseService {
+	return &UserNurseService{
+		userRepository: userRepository,
 	}
 }
 
-func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.User, error) {
-	nipExists, _ := s.userITRepository.DoesNIPExist(p.NIP)
+func (s *UserNurseService) Register(p *entities.UserNurseRegisterPayload) (*entities.User, error) {
+	nipExists, _ := s.userRepository.DoesNIPExist(p.NIP)
 
 	if nipExists {
 		return nil, errs.ErrNIPAlreadyRegistered
-	}
-
-	hashedPassword, err := helpers.HashPassword(p.Password)
-	if err != nil {
-		return nil, err
 	}
 
 	decodedNIP, err := helpers.DecodeNIP(p.NIP)
@@ -42,17 +35,16 @@ func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.U
 		return nil, err
 	}
 
-	if decodedNIP.RoleID != consts.NIP_CODE_ROLE_IT {
-		log.Fatalln(errs.ErrInvalidNIP)
-		return nil, errs.ErrInvalidNIP
+	_, err = helpers.IsNIPNurseValid(decodedNIP.RoleID)
+	if err != nil {
+		return nil, err
 	}
 
-	userIT, err := s.userITRepository.Store(&entities.UserITStorePayload{
+	userIT, err := s.userRepository.Store(&entities.UserStorePayload{
 		NIP:      p.NIP,
 		Name:     p.Name,
 		RoleID:   strconv.Itoa(decodedNIP.RoleID),
 		GenderID: strconv.Itoa(decodedNIP.GenderID),
-		Password: hashedPassword,
 	})
 
 	if err != nil {
@@ -66,21 +58,20 @@ func (s *UserITService) Register(p *entities.UserITRegisterPayload) (*entities.U
 	}
 
 	accessToken, errAccessToken := helpers.GenerateJWT(&paramsGenerateJWTRegister)
-
 	if errAccessToken != nil {
 		return nil, errAccessToken
 	}
 
 	return &entities.User{
 		ID:          userIT.ID,
-		NIP:         p.NIP,
+		NIP:         userIT.NIP,
 		Name:        p.Name,
 		AccessToken: accessToken,
 	}, nil
 }
 
-func (s *UserITService) Login(p *entities.UserITLoginPayload) (*entities.User, error) {
-	userIT, err := s.userITRepository.FindByNIP(p.NIP)
+func (s *UserNurseService) Login(p *entities.UserITLoginPayload) (*entities.User, error) {
+	userIT, err := s.userRepository.FindByNIP(p.NIP)
 	if err != nil {
 		return nil, err
 	}

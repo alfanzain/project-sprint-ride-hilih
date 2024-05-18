@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/alfanzain/project-sprint-halo-suster/app/helpers"
+	"github.com/alfanzain/project-sprint-halo-suster/app/http/helpers"
 	v1routes "github.com/alfanzain/project-sprint-halo-suster/app/http/routes/v1"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

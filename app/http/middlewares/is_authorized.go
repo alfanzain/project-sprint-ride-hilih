@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/alfanzain/project-sprint-halo-suster/app/helpers"
+	"github.com/alfanzain/project-sprint-halo-suster/app/http/helpers"
 )
 
 type ErrorResponse struct {

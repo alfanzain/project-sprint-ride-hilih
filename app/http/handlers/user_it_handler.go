@@ -8,9 +8,9 @@ import (
 	handlerContracts "github.com/alfanzain/project-sprint-halo-suster/app/contracts/handlers"
 	serviceContracts "github.com/alfanzain/project-sprint-halo-suster/app/contracts/services"
 	"github.com/alfanzain/project-sprint-halo-suster/app/entities"
-	"github.com/alfanzain/project-sprint-halo-suster/app/errs"
-	"github.com/alfanzain/project-sprint-halo-suster/app/repositories"
-	"github.com/alfanzain/project-sprint-halo-suster/app/services"
+	"github.com/alfanzain/project-sprint-halo-suster/app/http/errs"
+	"github.com/alfanzain/project-sprint-halo-suster/app/http/repositories"
+	"github.com/alfanzain/project-sprint-halo-suster/app/http/services"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,7 +22,7 @@ type UserITHandler struct {
 func NewUserITHandler(s serviceContracts.IUserITService) handlerContracts.IUserITHandler {
 	return &UserITHandler{
 		userITService: services.NewUserITService(
-			repositories.NewUserITRepository(),
+			repositories.NewUserRepository(),
 		),
 	}
 }

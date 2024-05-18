@@ -3,10 +3,12 @@ package helpers
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
 	"github.com/alfanzain/project-sprint-halo-suster/app/consts"
+	"github.com/alfanzain/project-sprint-halo-suster/app/http/errs"
 )
 
 type DecodedNIP struct {
@@ -85,4 +87,22 @@ func DecodeNIP(nip string) (nipNumber *DecodedNIP, err error) {
 	}
 
 	return nipNumber, nil
+}
+
+func IsNIPNurseValid(NIProleID int) (bool, error) {
+	if NIProleID == consts.NIP_CODE_ROLE_NURSE {
+		return true, nil
+	}
+
+	log.Fatalln(errs.ErrInvalidNIP)
+	return false, errs.ErrInvalidNIP
+}
+
+func IsNIPITValid(NIProleID int) (bool, error) {
+	if NIProleID == consts.NIP_CODE_ROLE_IT {
+		return true, nil
+	}
+
+	log.Fatalln(errs.ErrInvalidNIP)
+	return false, errs.ErrInvalidNIP
 }

@@ -1,5 +1,7 @@
 package services
 
+import "github.com/alfanzain/project-sprint-halo-suster/app/entities"
+
 type IUserService interface {
-	GetUsers(any) (any, error)
+	GetUsers(*entities.UserGetFilterParams) ([]*entities.User, error)
 }

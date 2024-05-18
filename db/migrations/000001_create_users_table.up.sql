@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     nip VARCHAR(13),
     role_id SMALLINT NULL,
     gender_id SMALLINT NULL,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT unique_nip UNIQUE (nip)
 );
