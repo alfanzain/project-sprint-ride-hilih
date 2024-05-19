@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"os"
 	"strconv"
 
@@ -72,24 +73,36 @@ func (s *UserNurseService) Register(p *entities.UserNurseRegisterPayload) (*enti
 	}, nil
 }
 
-func (s *UserNurseService) Login(p *entities.UserITLoginPayload) (*entities.UserLoginResponse, error) {
-	userIT, err := s.userRepository.FindByNIP(p.NIP)
+func (s *UserNurseService) Login(p *entities.UserNurseLoginPayload) (*entities.UserLoginResponse, error) {
+	log.Println("user nurse service login")
+	decodedNIP, err := helpers.DecodeNIP(p.NIP)
 	if err != nil {
 		return nil, err
 	}
-	if userIT == nil {
-		return nil, errs.ErrUserITNotFound
+
+	_, err = helpers.IsNIPNurseValid(decodedNIP.RoleID)
+	if err != nil {
+		return nil, errs.ErrUserNotFound
 	}
 
-	isValidPassword := helpers.CheckPasswordHash(p.Password, *userIT.Password)
+	userNurse, err := s.userRepository.FindNurseByNIP(p.NIP)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errs.ErrUserNotFound
+		}
+
+		return nil, err
+	}
+
+	isValidPassword := helpers.CheckPasswordHash(p.Password, *userNurse.Password)
 	if !isValidPassword {
 		return nil, errs.ErrInvalidPassword
 	}
 
 	paramsGenerateJWTLogin := helpers.ParamsGenerateJWT{
 		SecretKey: os.Getenv("JWT_SECRET"),
-		UserID:    userIT.ID,
-		RoleID:    userIT.RoleID,
+		UserID:    userNurse.ID,
+		RoleID:    userNurse.RoleID,
 	}
 
 	accessToken, err := helpers.GenerateJWT(&paramsGenerateJWTLogin)
@@ -98,9 +111,9 @@ func (s *UserNurseService) Login(p *entities.UserITLoginPayload) (*entities.User
 	}
 
 	return &entities.UserLoginResponse{
-		ID:          userIT.ID,
-		NIP:         userIT.NIP,
-		Name:        userIT.Name,
+		ID:          userNurse.ID,
+		NIP:         userNurse.NIP,
+		Name:        userNurse.Name,
 		AccessToken: accessToken,
 	}, nil
 }
@@ -122,7 +135,7 @@ func (s *UserNurseService) Update(p *entities.UserUpdatePayload) (*entities.User
 
 	_, err = helpers.IsNIPNurseValid(roleID)
 	if err != nil {
-		return nil, errs.ErrNotNurse
+		return nil, errs.ErrUserNurseNotFound
 	}
 
 	decodedNIP, err := helpers.DecodeNIP(p.NIP)
@@ -164,7 +177,7 @@ func (s *UserNurseService) UpdatePassword(p *entities.UserNurseGrantAccessPayloa
 
 	_, err = helpers.IsNIPNurseValid(roleID)
 	if err != nil {
-		return nil, errs.ErrNotNurse
+		return nil, errs.ErrUserNurseNotFound
 	}
 
 	hashedPassword, err := helpers.HashPassword(p.Password)
@@ -201,7 +214,7 @@ func (s *UserNurseService) Delete(userID string) (bool, error) {
 
 	_, err = helpers.IsNIPNurseValid(roleID)
 	if err != nil {
-		return false, errs.ErrNotNurse
+		return false, errs.ErrUserNurseNotFound
 	}
 
 	_, err = s.userRepository.Destroy(userID)

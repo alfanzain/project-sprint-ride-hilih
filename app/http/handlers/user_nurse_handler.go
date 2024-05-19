@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -78,45 +79,58 @@ func (h *UserNurseHandler) Register(c echo.Context) (e error) {
 }
 
 func (h *UserNurseHandler) Login(c echo.Context) (e error) {
-	// r := new(entities.UserITLoginRequest)
+	log.Println("user nurse handler login")
 
-	// if e = c.Bind(r); e != nil {
-	// 	return c.JSON(http.StatusBadRequest, ErrorResponse{
-	// 		Status:  false,
-	// 		Message: e.Error(),
-	// 	})
-	// }
+	r := new(entities.UserNurseLoginRequest)
 
-	// if e = c.Validate(r); e != nil {
-	// 	return c.JSON(http.StatusBadRequest, ErrorResponse{
-	// 		Status:  false,
-	// 		Message: e.Error(),
-	// 	})
-	// }
+	if e = c.Bind(r); e != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
 
-	// data, e := h.userNurseService.Login(&entities.UserITLoginPayload{
-	// 	NIP:      strconv.Itoa(r.NIP),
-	// 	Password: r.Password,
-	// })
+	if e = c.Validate(r); e != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
 
-	// if e != nil {
-	// 	if e == errs.ErrUserITNotFound {
-	// 		return c.JSON(http.StatusNotFound, ErrorResponse{
-	// 			Status:  false,
-	// 			Message: e.Error(),
-	// 		})
-	// 	} else if e == errs.ErrInvalidPassword {
-	// 		return c.JSON(http.StatusBadRequest, ErrorResponse{
-	// 			Status:  false,
-	// 			Message: e.Error(),
-	// 		})
-	// 	}
-	// }
+	data, e := h.userNurseService.Login(&entities.UserNurseLoginPayload{
+		NIP:      strconv.Itoa(r.NIP),
+		Password: r.Password,
+	})
+
+	if e != nil {
+		if e == errs.ErrUserNotFound {
+			return c.JSON(http.StatusNotFound, ErrorResponse{
+				Status:  false,
+				Message: e.Error(),
+			})
+		}
+		if e == errs.ErrUserNurseNotFound {
+			return c.JSON(http.StatusNotFound, ErrorResponse{
+				Status:  false,
+				Message: e.Error(),
+			})
+		}
+		if e == errs.ErrInvalidPassword {
+			return c.JSON(http.StatusBadRequest, ErrorResponse{
+				Status:  false,
+				Message: e.Error(),
+			})
+		}
+
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Status:  false,
+			Message: e.Error(),
+		})
+	}
 
 	return c.JSON(http.StatusOK, SuccessResponse{
-		Message: "User logged successfully",
-		// Data:    data,
-		Data: nil,
+		Message: "User logged successfullys",
+		Data:    data,
 	})
 }
 
@@ -160,7 +174,7 @@ func (h *UserNurseHandler) Update(c echo.Context) (e error) {
 			})
 		}
 
-		if errors.Is(err, errs.ErrNotNurse) {
+		if errors.Is(err, errs.ErrUserNurseNotFound) {
 			return c.JSON(http.StatusBadRequest, ErrorResponse{
 				Status:  false,
 				Message: err.Error(),
@@ -198,7 +212,7 @@ func (h *UserNurseHandler) Delete(c echo.Context) (e error) {
 			})
 		}
 
-		if errors.Is(err, errs.ErrNotNurse) {
+		if errors.Is(err, errs.ErrUserNurseNotFound) {
 			return c.JSON(http.StatusBadRequest, ErrorResponse{
 				Status:  false,
 				Message: err.Error(),
@@ -248,7 +262,7 @@ func (h *UserNurseHandler) GrantAccess(c echo.Context) (e error) {
 			})
 		}
 
-		if errors.Is(err, errs.ErrNotNurse) {
+		if errors.Is(err, errs.ErrUserNurseNotFound) {
 			return c.JSON(http.StatusBadRequest, ErrorResponse{
 				Status:  false,
 				Message: err.Error(),

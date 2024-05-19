@@ -45,6 +45,30 @@ func (r *UserRepository) FindByNIP(NIP string) (*entities.User, error) {
 	return &user, nil
 }
 
+func (r *UserRepository) FindITByNIP(NIP string) (*entities.User, error) {
+	var user entities.User
+	err := r.DB.QueryRow(`SELECT id, nip, name, password, role_id, gender_id FROM users WHERE nip = $1 AND role_id = $2`, NIP, consts.NIP_CODE_ROLE_IT).Scan(&user.ID, &user.NIP, &user.Name, &user.Password, &user.RoleID, &user.GenderID)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Fatalln(err)
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *UserRepository) FindNurseByNIP(NIP string) (*entities.User, error) {
+	var user entities.User
+	err := r.DB.QueryRow(`SELECT id, nip, name, password, role_id, gender_id FROM users WHERE nip = $1 AND role_id = $2`, NIP, consts.NIP_CODE_ROLE_NURSE).Scan(&user.ID, &user.NIP, &user.Name, &user.Password, &user.RoleID, &user.GenderID)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Fatalln(err)
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (r *UserRepository) DoesNIPExist(NIP string) (bool, error) {
 	var scannedNIP string
 	err := r.DB.QueryRow(`SELECT nip FROM users WHERE nip = $1`, NIP).Scan(&scannedNIP)

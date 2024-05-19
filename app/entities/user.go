@@ -52,6 +52,11 @@ type (
 		IdentityCardScanImg string `json:"identityCardScanImg" validate:"required"` // should be url
 	}
 
+	UserNurseLoginRequest struct {
+		NIP      int    `json:"nip" validate:"required"`
+		Password string `json:"password" validate:"required,min=5,max=15"`
+	}
+
 	UserNurseGrantAccessRequest struct {
 		Password string `json:"password" validate:"required"`
 	}
@@ -85,6 +90,11 @@ type (
 		ID   string
 		NIP  string
 		Name string
+	}
+
+	UserNurseLoginPayload struct {
+		NIP      string
+		Password string
 	}
 
 	UserNurseGrantAccessPayload struct {
