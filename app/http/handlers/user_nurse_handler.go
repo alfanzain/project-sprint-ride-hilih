@@ -186,13 +186,20 @@ func (h *UserNurseHandler) Update(c echo.Context) (e error) {
 	})
 }
 
-func (h *UserNurseHandler) Destroy(c echo.Context) (e error) {
+func (h *UserNurseHandler) Delete(c echo.Context) (e error) {
 	id := c.Param("userID")
 
 	data, err := h.userNurseService.Delete(id)
 	if err != nil {
 		if errors.Is(err, errs.ErrUserNotFound) {
 			return c.JSON(http.StatusNotFound, ErrorResponse{
+				Status:  false,
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, errs.ErrNotNurse) {
+			return c.JSON(http.StatusBadRequest, ErrorResponse{
 				Status:  false,
 				Message: err.Error(),
 			})
@@ -236,6 +243,13 @@ func (h *UserNurseHandler) GrantAccess(c echo.Context) (e error) {
 	if err != nil {
 		if errors.Is(err, errs.ErrUserNotFound) {
 			return c.JSON(http.StatusNotFound, ErrorResponse{
+				Status:  false,
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, errs.ErrNotNurse) {
+			return c.JSON(http.StatusBadRequest, ErrorResponse{
 				Status:  false,
 				Message: err.Error(),
 			})
