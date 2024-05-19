@@ -10,6 +10,7 @@ type V1Routes struct {
 
 type iV1Routes interface {
 	MountUser()
+	MountMedical()
 }
 
 func New(v1Routes *V1Routes) iV1Routes {

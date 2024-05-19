@@ -15,7 +15,7 @@ func IsRoleITOrNurse() echo.MiddlewareFunc {
 			userCtx := new(UserValidator)
 			mapstructure.Decode(c.Get("user"), &userCtx)
 
-			if userCtx.RoleID != strconv.Itoa(consts.NIP_CODE_ROLE_IT) || userCtx.RoleID != strconv.Itoa(consts.NIP_CODE_ROLE_NURSE) {
+			if userCtx.RoleID != strconv.Itoa(consts.NIP_CODE_ROLE_IT) && userCtx.RoleID != strconv.Itoa(consts.NIP_CODE_ROLE_NURSE) {
 				return c.JSON(http.StatusUnauthorized, ErrorResponse{
 					Status:  false,
 					Message: "Unauthorized",
