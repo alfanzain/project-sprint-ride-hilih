@@ -1,6 +1,8 @@
-# Halo Suster
+# Ride Hilih
 
-![halo suster](https://i.kym-cdn.com/photos/images/original/000/435/652/1f9.png)
+![HILIH](docs/hilih-kid.jpeg)
 
-`migrate -database "postgres://postgres:postgres@localhost:5432/local_halo_suster?sslmode=disable" -path db/migrations up`
+![HILIH](docs/hilih-arnold.jpeg)
+
+![HILIH](docs/hilih-cat.jpg)
 
